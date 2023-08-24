@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from cleo.exceptions import CleoLogicError
 from cleo.loaders.factory_command_loader import FactoryCommandLoader
 
-
 if TYPE_CHECKING:
     from collections.abc import Callable
 
