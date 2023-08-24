@@ -66,9 +66,6 @@ class Application(BaseApplication):
 
         self._ssprompt: Ssprompt | None = None
         self._io: IO | None = None
-        self._disable_plugins = False
-        self._disable_cache = False
-        self._plugins_loaded = False
 
         dispatcher = EventDispatcher()
         dispatcher.add_listener(str(COMMAND), self.register_command_loggers)
@@ -122,9 +119,7 @@ class Application(BaseApplication):
 
         # 必须要打印日志的模块   
         loggers = [
-            "poetry.packages.locker",
-            "poetry.packages.package",
-            "poetry.utils.password_manager",
+            "ssprompt.packages.locker",
         ]
 
         loggers += command.loggers
@@ -147,6 +142,7 @@ class Application(BaseApplication):
 
         for name in loggers:
             logger = logging.getLogger(name)
+            print(name)
             logger.setLevel(level)
     
 def main() -> int:
