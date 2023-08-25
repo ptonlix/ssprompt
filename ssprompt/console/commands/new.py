@@ -12,7 +12,14 @@ class NewCommand(Command):
     name = "new"
     description = "Creates a new Prompt project at <path>."
 
-    arguments = [argument("path", "The path to create the project at.")]
+    arguments = [
+        argument("path", "The path to create the project at."),
+        argument(
+            "types", 
+            "Specify the Prompt file type, default to all. option: [text,json,yaml,python]",
+            optional=True,
+            default="all")
+        ]
     options = [
         option("name", None, "Set the resulting project name.", flag=False),
         option(
@@ -20,6 +27,30 @@ class NewCommand(Command):
             None,
             "Specify the readme file format. One of md (default) or rst",
             flag=False,
+        ),
+        option(
+            "llm",
+            "l",
+            "The applicable large model version of Prompt, example: --llm=gpt-3.5-turbo",
+            flag=False,
+            multiple=True,
+            default=["gpt-3.5-turbo"]
+        ),
+        option(
+            "tag",
+            "t",
+            "The tags of Prompt, example: --tag=common",
+            flag=False,
+            multiple=True,
+            default=["common"]
+        ),
+        option(
+            "dependencies",
+            "d",
+            "Prompt depends on the environment, such as , example: -d=langchain==^0.0.266",
+            flag=False,
+            multiple=True,
+            default=["langchan==^0.0.266"]
         ),
     ]
 
@@ -32,11 +63,12 @@ class NewCommand(Command):
         layout_cls = layout("standard")
 
         path = Path(self.argument("path"))
+        types_list = self.argument("types").split(",")
+
         if not path.is_absolute():
             # we do not use resolve here due to compatibility issues
             # for path.resolve(strict=False)
             path = Path.cwd().joinpath(path)
-        
         name = self.option("name")
         if not name:
             name = path.name
@@ -51,13 +83,39 @@ class NewCommand(Command):
         
         # 获取Git配置信息
         git_config = GitConfig()
-
+        author_list = []
         author = git_config.username
         author_email = git_config.email
+        if author and author_email:
+            author += f" <{author_email}>"
+            author_list = [author]
+        else:
+            author_list = []
+        # llm
+        llm_list = self.option("llm")
+        # tag
+        tag_list = self.option("tag")
 
-        author += f" <{author_email}>"
+        # dependencies
+        depend_list = self.option("dependencies")
+        depend_obj = {}
+        for depend in depend_list:
+            depend_sub_list = depend.split("==")
+            depend_obj[depend_sub_list[0]] = depend_sub_list[1]
+        print(depend_obj)
 
-        print(author)
+        layout_ = layout_cls(
+            name,
+            "0.1.0",
+            author=author_list,
+            readme_format=readme_format,
+            llm=llm_list,
+            tag=tag_list,
+            types_list=types_list
+        )
+
+        layout_.create(path)
+
 
 
 

@@ -1,13 +1,12 @@
 
 from __future__ import annotations
+from time import sleep
 
 from typing import Any, Dict, List, Mapping, Sequence, Union
 
 from pydantic import BaseModel, Field, validator
 
-
-class Config(BaseModel):
-
+class MetaConfig(BaseModel):
     name: str = Field(frozen=True)
     version: str = Field(frozen=True, regex=r'^[0-9]\d?(\.([1-9]?\d)){2}$')
     description: str = Field(max_length=255)
@@ -15,7 +14,11 @@ class Config(BaseModel):
     author: List[str] = Field(default=[])
     llm: List[str] =  Field(default=[])
     readme_format: str = Field(default="md")
-    license: str | None = Field(default="MIT")
+    license: str | None = Field(default="MIT") 
+
+class Config(BaseModel):
+
+    meta: MetaConfig
     text_prompt: Dict[str, str] | None 
     yaml_prompt: Dict[str, str | List[Dict]] | None 
     json_prompt: Dict[str, str | List[Dict]] | None 
@@ -76,6 +79,7 @@ class Config(BaseModel):
 
 if __name__ := "__main__":
     config = {
+        "meta":{
         "name":"test",
         "version":"0.1.2",
         "description":"qwe123",
@@ -83,7 +87,7 @@ if __name__ := "__main__":
         "author":["chenfudong"],
         "llm": ["chatgpt"],
         "readme_format": "md",
-        "license" : "MIT",
+        "license" : "MIT"},
         "text_prompt":{
             "dirname":"123",
         },

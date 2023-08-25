@@ -142,7 +142,6 @@ class Application(BaseApplication):
 
         for name in loggers:
             logger = logging.getLogger(name)
-            print(name)
             logger.setLevel(level)
     
 def main() -> int:
