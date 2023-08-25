@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from packaging.utils import canonicalize_name
-from ssprompt.core.config import Config
-from ssprompt.core.config import PyYaml
-from pathlib import Path
+
+from ssprompt.core.config import Config, PyYaml
 
 if TYPE_CHECKING:
     from typing import Any, Dict, List, Mapping, Sequence, Union
@@ -15,36 +13,37 @@ if TYPE_CHECKING:
 SSPROMPT_DEFAULT = """\
 meta:
   author:
-  - Your Name <you@example.com>
-  description: "Describe Prompt Engineering Information"
+  - ptonlix <260431910@qq.com>
+  description: ''
   license: MIT
   llm:
   - gpt-3.5-turbo
-  name: example
+  name: open
   readme_format: md
   tag:
-  - question
-  version: 0.1.2
+  - common
+  version: 0.1.0
 text_prompt:
-  dirname: 'text'
+  dirname: text
 json_prompt:
-  dirname: 'json'
+  dirname: json
   list:
   - dependencies:
-    - langchain: ^0.0.266
+      langchain: 0.0.266
     name: example
 yaml_prompt:
-  dirname: 'yaml'
+  dirname: yaml
   list:
   - dependencies:
-    - langchain: ^0.0.266
+      langchain: 0.0.266
     name: example
 python_prompt:
-  dirname: 'python'
+  dirname: python
   list:
   - dependencies:
-    - langchain: ^0.0.266
+      langchain: 0.0.266
     name: example
+
 """
 
 class Layout:
@@ -62,6 +61,7 @@ class Layout:
         readme_format: str = "md",
         license: str | None = "MIT",
         types_list: List=[],
+        dependencies: Dict={},
         text_prompt: Dict[str, str] | None =None,
         yaml_prompt: Dict[str, str | List[Dict]] | None =None,
         json_prompt: Dict[str, str | List[Dict]] | None =None,
@@ -82,8 +82,11 @@ class Layout:
         self._python_prompt = python_prompt or {}
 
         self._types_list = types_list
+        self._dependencies = dependencies
 
         self._ssprompt_config = self._create_ssprompt_config() 
+        self._set_all_dependencies(self._dependencies)
+        self._set_all_list_name(self._name) #Prompt类型中，默认子默认为工程名字
 
     def _create_readme(self, path: Path) -> Path:
         readme_file = path.joinpath(f"README.{self._readme_format}")
@@ -103,8 +106,29 @@ class Layout:
         conf.meta.license = self._license
         conf.meta.tag = self._tag
 
-
         return conf
+
+    def _set_all_list_name(self, name: str):
+        self._set_list_name(name, self._ssprompt_config.json_prompt)
+        self._set_list_name(name, self._ssprompt_config.yaml_prompt)
+        self._set_list_name(name, self._ssprompt_config.python_prompt)
+
+    def _set_list_name(self, name: str, prompt: Dict[Any, Any] | None):
+        if prompt:
+            if prompt_list := prompt.get("list"):
+                for prompt_list_obj in prompt_list:
+                    prompt_list_obj["name"] = name
+
+    def _set_all_dependencies(self, depend: Dict):
+        self._set_dependencies(depend, self._ssprompt_config.json_prompt)
+        self._set_dependencies(depend, self._ssprompt_config.yaml_prompt)
+        self._set_dependencies(depend, self._ssprompt_config.python_prompt)
+
+    def _set_dependencies(self, depend: Dict, prompt: Dict[Any, Any] | None):
+        if prompt:
+            if prompt_list := prompt.get("list"):
+                for prompt_list_obj in prompt_list:
+                    prompt_list_obj["dependencies"] = depend
 
     def _create_prompt_dir(self, path: Path, prompt: Dict[Any, Any] | None):
         if prompt:
@@ -117,11 +141,13 @@ class Layout:
                     prompt_list_path = prompt_path.joinpath(prompt_list_path)
                     prompt_list_path.mkdir(parents=True, exist_ok=True)
                     
-    def _create_all_dir(self, path: Path):
+    def _create_all_dir(self, path: Path, with_tests: bool):
         self._create_prompt_dir(path, self._ssprompt_config.text_prompt) 
         self._create_prompt_dir(path, self._ssprompt_config.yaml_prompt)
         self._create_prompt_dir(path, self._ssprompt_config.json_prompt)
         self._create_prompt_dir(path, self._ssprompt_config.python_prompt)
+        if with_tests:
+            self._create_tests(path, self._ssprompt_config.python_prompt)
 
     def _create_config_file(self, path: Path):
         path_file = path.joinpath(self._name+".yaml")
@@ -135,7 +161,7 @@ class Layout:
         for prompt_type in self._types_list:
             match prompt_type:
                 case "all":
-                    self._create_all_dir(path)
+                    self._create_all_dir(path, with_tests)
                 case "text":
                     self._create_prompt_dir(path, self._ssprompt_config.text_prompt) 
                 case "yaml":
@@ -144,15 +170,28 @@ class Layout:
                     self._create_prompt_dir(path, self._ssprompt_config.json_prompt)
                 case "python":
                     self._create_prompt_dir(path, self._ssprompt_config.python_prompt)
+                    if with_tests:
+                        self._create_tests(path, self._ssprompt_config.python_prompt)
                 case _:
                     raise ValueError("Incorrect Prompt Type.Optional:[text, json, yaml, python]")
-
-        # self._create_prompt_dir(path, self._ssprompt_config.text_prompt) 
-        # self._create_prompt_dir(path, self._ssprompt_config.yaml_prompt)
-        # self._create_prompt_dir(path, self._ssprompt_config.json_prompt)
-        # self._create_prompt_dir(path, self._ssprompt_config.python_prompt)
-       
+ 
+        
         self._create_readme(path)
 
         self._create_config_file(path) 
 
+        
+
+
+    @staticmethod
+    def _create_tests(path: Path, prompt: Dict[Any, Any] | None):
+        if not prompt:
+            return    
+        prompt_path = Path(str(prompt["dirname"]))
+        prompt_path = path.joinpath(prompt_path)
+          
+        tests = prompt_path / "tests"
+        tests.mkdir()
+
+        tests_init = tests / "__init__.py"
+        tests_init.touch(exist_ok=False)

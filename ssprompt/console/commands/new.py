@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 
-from cleo.helpers import argument
-from cleo.helpers import option
+from cleo.helpers import argument, option
 
 from ssprompt.console.commands.command import Command
 
@@ -57,8 +56,9 @@ class NewCommand(Command):
     loggers = ["ssprompt.core.vcs.git"]
     def handle(self) -> int:
         from pathlib import Path
-        from ssprompt.layouts import layout
+
         from ssprompt.core.vcs.git import GitConfig
+        from ssprompt.layouts import layout
       
         layout_cls = layout("standard")
 
@@ -98,6 +98,7 @@ class NewCommand(Command):
 
         # dependencies
         depend_list = self.option("dependencies")
+        print(depend_list)
         depend_obj = {}
         for depend in depend_list:
             depend_sub_list = depend.split("==")
@@ -111,7 +112,8 @@ class NewCommand(Command):
             readme_format=readme_format,
             llm=llm_list,
             tag=tag_list,
-            types_list=types_list
+            types_list=types_list,
+            dependencies=depend_obj
         )
 
         layout_.create(path)
