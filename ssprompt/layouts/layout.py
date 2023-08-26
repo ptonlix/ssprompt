@@ -149,9 +149,9 @@ class Layout:
         if with_tests:
             self._create_tests(path, self._ssprompt_config.python_prompt)
 
-    def _create_config_file(self, path: Path):
+    def create_config_file(self, path: Path):
         path_file = path.joinpath(self._name+".yaml")
-        yaml = PyYaml(str(path_file))
+        yaml = PyYaml(path_file)
         yaml.write_config_to_yaml(self._ssprompt_config)
 
     def create(self, path: Path, with_tests: bool = True) -> None:
@@ -178,7 +178,7 @@ class Layout:
         
         self._create_readme(path)
 
-        self._create_config_file(path) 
+        self.create_config_file(path) 
 
         
 

@@ -1,10 +1,11 @@
 
 from __future__ import annotations
-from time import sleep
 
+from time import sleep
 from typing import Any, Dict, List, Mapping, Sequence, Union
 
 from pydantic import BaseModel, Field, validator
+
 
 class MetaConfig(BaseModel):
     name: str = Field(frozen=True)

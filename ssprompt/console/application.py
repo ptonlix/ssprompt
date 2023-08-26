@@ -2,12 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-
 from contextlib import suppress
 from importlib import import_module
-from typing import TYPE_CHECKING
-from typing import cast
-
+from typing import TYPE_CHECKING, cast
 
 from cleo.application import Application as BaseApplication
 from cleo.events.console_command_event import ConsoleCommandEvent
@@ -21,7 +18,6 @@ from ssprompt.__version__ import __version__
 from ssprompt.console.command_loader import CommandLoader
 from ssprompt.console.commands.command import Command
 
-
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -31,9 +27,8 @@ if TYPE_CHECKING:
     from cleo.io.inputs.input import Input
     from cleo.io.io import IO
     from cleo.io.outputs.output import Output
-    from crashtest.solution_providers.solution_provider_repository import (
-        SolutionProviderRepository,
-    )
+    from crashtest.solution_providers.solution_provider_repository import \
+        SolutionProviderRepository
 
     from ssprompt.ssprompt import Ssprompt
 

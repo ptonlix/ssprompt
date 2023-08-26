@@ -20,7 +20,7 @@ class NewCommand(Command):
             default="all")
         ]
     options = [
-        option("name", None, "Set the resulting project name.", flag=False),
+        option("name", None, "Set the prompt project name.", flag=False),
         option(
             "readme",
             None,
@@ -46,10 +46,10 @@ class NewCommand(Command):
         option(
             "dependencies",
             "d",
-            "Prompt depends on the environment, such as , example: -d=langchain==^0.0.266",
+            'Prompt depends on the environment, such as , example: -d=langchain=="^0.0.266"',
             flag=False,
             multiple=True,
-            default=["langchan==^0.0.266"]
+            default=['langchan=="^0.0.266"']
         ),
     ]
 
@@ -98,12 +98,12 @@ class NewCommand(Command):
 
         # dependencies
         depend_list = self.option("dependencies")
-        print(depend_list)
         depend_obj = {}
         for depend in depend_list:
+            if not depend.find("=="):
+                raise ValueError('The input format of dependencies is incorrect. eg. -d langchain=="^0.0.266"')
             depend_sub_list = depend.split("==")
             depend_obj[depend_sub_list[0]] = depend_sub_list[1]
-        print(depend_obj)
 
         layout_ = layout_cls(
             name,

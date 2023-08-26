@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from ssprompt.layouts.layout import Layout
 
-
 _LAYOUTS = {"standard": Layout}
 
 

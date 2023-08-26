@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 cleo = "^2.0.1"
+requests = "^2.31.0"
 
 
 [build-system]

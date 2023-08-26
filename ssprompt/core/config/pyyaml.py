@@ -1,19 +1,22 @@
 
 from __future__ import annotations
 
-import yaml
 import logging
 import re
 from typing import TYPE_CHECKING
+
+import yaml
+
 from ssprompt.core.config import Config
 
 if TYPE_CHECKING:
-    from typing import Mapping, Optional, Any
+    from pathlib import Path
+    from typing import Any, Mapping, Optional
 
 logger = logging.getLogger(__name__)
 
 class PyYaml:
-    def __init__(self, file_path: Optional[str]=None):
+    def __init__(self, file_path: Optional[Path]=None):
         self.file_path = file_path
 
     def write_config_to_yaml(self, conf: Config):
@@ -33,11 +36,11 @@ class PyYaml:
         try:
             with open(self.file_path, 'r') as file:
                 data = yaml.safe_load(file)
-                return data
+                return Config(**data)
         except FileNotFoundError:
             logger.error(f"File '{self.file_path}' not found.")
             return None
-
+    
     @classmethod    
     def read_config_from_str(cls, s: str) -> Config | Any:
         try:
@@ -72,7 +75,19 @@ class PyYaml:
         except FileNotFoundError:
             logger.error(f"File '{self.file_path}' not found.")
             return None
-        
+       
+    def file_exist(self) -> bool:
+        return self.file_path.exists() if self.file_path else False
+
+    def is_ssprompt_config(self) -> bool:
+        try:
+            config = self.read_config_from_yaml()
+        except ValueError as e:
+            logger.error("The config yaml isn't the ssprompt config file.")
+            logger.debug(e)
+            return False
+        return True
+
 
 if __name__ == "__main__":
     #Example usage
@@ -82,7 +97,7 @@ if __name__ == "__main__":
         "email": "johndoe@example.com"
     }
 
-    yaml_file = "data.yaml"
+    yaml_file = Path("data.yaml")
 
     # Write data to YAML file
     yaml_writer = PyYaml(yaml_file)

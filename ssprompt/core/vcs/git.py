@@ -1,10 +1,9 @@
 from __future__ import annotations
-from operator import gt
 
+import logging
 import os
 import subprocess
-import logging
-
+from operator import gt
 from typing import TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
