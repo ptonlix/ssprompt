@@ -6,6 +6,7 @@ import re
 from typing import TYPE_CHECKING
 
 import yaml
+import shutil
 
 from ssprompt.core.config import Config
 
@@ -25,12 +26,22 @@ class PyYaml:
         with open(self.file_path, 'w+') as file:
             # 按顺序输出 
             yaml.dump({"meta":conf.meta.dict()}, file, default_flow_style=False)
-            yaml.dump({"text_prompt":conf.text_prompt}, file, default_flow_style=False)
-            yaml.dump({"json_prompt":conf.json_prompt}, file, default_flow_style=False)
-            yaml.dump({"yaml_prompt":conf.yaml_prompt}, file, default_flow_style=False)
-            yaml.dump({"python_prompt":conf.python_prompt}, file, default_flow_style=False)
+            if conf.text_prompt:
+                yaml.dump({"text_prompt":conf.text_prompt}, file, default_flow_style=False)
+            if conf.json_prompt:
+                yaml.dump({"json_prompt":conf.json_prompt}, file, default_flow_style=False)
+            if conf.yaml_prompt:
+                yaml.dump({"yaml_prompt":conf.yaml_prompt}, file, default_flow_style=False)
+            if conf.python_prompt:
+                yaml.dump({"python_prompt":conf.python_prompt}, file, default_flow_style=False)
 
-    def read_config_from_yaml(self) -> Config | None:
+    def reload_config_to_yaml(self, conf: Config):
+        import os 
+        os.remove(self.file_path)
+        self.write_config_to_yaml(conf)
+           
+
+    def read_config_from_yaml(self) -> Config | Any:
         if not self.file_path:
             return 
         try:

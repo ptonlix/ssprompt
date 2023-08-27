@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 from packaging.utils import canonicalize_name
 
-from ssprompt.core.config import Config, PyYaml
+from ssprompt.core.config import Config, PyYaml, PromptTypesList
 
 if TYPE_CHECKING:
     from typing import Any, Dict, List, Mapping, Sequence, Union
@@ -66,6 +66,7 @@ class Layout:
         yaml_prompt: Dict[str, str | List[Dict]] | None =None,
         json_prompt: Dict[str, str | List[Dict]] | None =None,
         python_prompt: Dict[str, str | List[Dict]] | None =None,
+        conf_path: Path = Path(),
     ) -> None:
         self._name = canonicalize_name(name) 
         self._version = version
@@ -84,17 +85,17 @@ class Layout:
         self._types_list = types_list
         self._dependencies = dependencies
 
-        self._ssprompt_config = self._create_ssprompt_config() 
-        self._set_all_dependencies(self._dependencies)
-        self._set_all_list_name(self._name) #Prompt类型中，默认子默认为工程名字
+        self._ssprompt_config = self._create_ssprompt_config(conf_path) 
 
     def _create_readme(self, path: Path) -> Path:
         readme_file = path.joinpath(f"README.{self._readme_format}")
         readme_file.touch()
         return readme_file
     
-    def _create_ssprompt_config(self)-> Config:
-        print(self.default_config)
+    def _create_ssprompt_config(self, path: Path)-> Config:
+        if path.exists():
+            conf = PyYaml(path).read_config_from_yaml()
+            return conf
         conf =  self.default_config.copy(deep=True)
         conf.meta.name= self._name
         conf.meta.author = self._author
@@ -106,7 +107,53 @@ class Layout:
         conf.meta.license = self._license
         conf.meta.tag = self._tag
 
+        self._set_all_dependencies(self._dependencies)
+        self._set_all_list_name(self._name) #Prompt类型中，默认子默认为工程名字
+        self._del_prompt_type(self._types_list)
+
         return conf
+
+    def _add_prompt_type(self, types_list:list,  dependencies: Dict):
+        for prompt_type in types_list:
+            match prompt_type:
+                case "text":
+                    if not self._ssprompt_config.text_prompt:
+                        self._ssprompt_config.text_prompt =  self.default_config.text_prompt.copy()
+                case "yaml":
+                    if not self._ssprompt_config.yaml_prompt :
+                        self._ssprompt_config.yaml_prompt =  self.default_config.yaml_prompt.copy()
+                        self._set_list_name(self._ssprompt_config.meta.name, self._ssprompt_config.yaml_prompt)
+                        self._set_dependencies(dependencies, self._ssprompt_config.yaml_prompt)
+                case "json":
+                    if not self._ssprompt_config.json_prompt :
+                        self._ssprompt_config.json_prompt =  self.default_config.json_prompt.copy()
+                        self._set_list_name(self._ssprompt_config.meta.name, self._ssprompt_config.json_prompt)
+                        self._set_dependencies(dependencies, self._ssprompt_config.json_prompt)
+                case "python":
+                    if not self._ssprompt_config.python_prompt :
+                        self._ssprompt_config.python_prompt =  self.default_config.python_prompt.copy()
+                        self._set_list_name(self._ssprompt_config.meta.name, self._ssprompt_config.python_prompt)
+                        self._set_dependencies(dependencies, self._ssprompt_config.python_prompt)
+                case _:
+                    raise ValueError("Incorrect Prompt Type.Optional:[text, json, yaml, python]")
+    
+    def _del_prompt_type(self, types_list:list):
+        del_types_list = set(PromptTypesList) - set(types_list)
+        for prompt_type in del_types_list:
+            match prompt_type:
+                case "all":
+                    return
+                case "text":
+                    self._ssprompt_config.text_prompt = None
+                case "yaml":
+                    self._ssprompt_config.yaml_prompt = None
+                case "json":
+                    self._ssprompt_config.json_prompt = None
+                case "python":
+                    self._ssprompt_config.python_prompt = None
+                case _:
+                    raise ValueError("Incorrect Prompt Type.Optional:[text, json, yaml, python]")
+ 
 
     def _set_all_list_name(self, name: str):
         self._set_list_name(name, self._ssprompt_config.json_prompt)
@@ -153,16 +200,24 @@ class Layout:
         path_file = path.joinpath(self._name+".yaml")
         yaml = PyYaml(path_file)
         yaml.write_config_to_yaml(self._ssprompt_config)
-
-    def create(self, path: Path, with_tests: bool = True) -> None:
-        path.mkdir(parents=True, exist_ok=True)
-
+    
+    def reload_config_file(self, path: Path):
+        path_file = path.joinpath(self._ssprompt_config.meta.name+".yaml")
+        yaml = PyYaml(path_file)
+        if not yaml.file_exist():
+            raise ValueError("The configuration file does not exist and the project has not been established.\n\
+Please use the new or init command to initialize the project")
+        yaml.reload_config_to_yaml(self._ssprompt_config)
         
-        for prompt_type in self._types_list:
+
+    def create_types_dir(self,  path: Path, types_list: list, with_tests: bool = True):
+        path.mkdir(parents=True, exist_ok=True)
+        for prompt_type in types_list:
             match prompt_type:
                 case "all":
                     self._create_all_dir(path, with_tests)
                 case "text":
+                    print(123)
                     self._create_prompt_dir(path, self._ssprompt_config.text_prompt) 
                 case "yaml":
                     self._create_prompt_dir(path, self._ssprompt_config.yaml_prompt) 
@@ -174,13 +229,26 @@ class Layout:
                         self._create_tests(path, self._ssprompt_config.python_prompt)
                 case _:
                     raise ValueError("Incorrect Prompt Type.Optional:[text, json, yaml, python]")
- 
+
+    def create(self, path: Path, with_tests: bool = True) -> None:
+        path.mkdir(parents=True, exist_ok=True)
+
         
+        self.create_types_dir(path, self._types_list, with_tests)
+ 
         self._create_readme(path)
 
         self.create_config_file(path) 
 
+
+    def add(self, path: Path, types_list: list, dependencies: Dict, with_tests: bool = True):
+        path.mkdir(parents=True, exist_ok=True)
+
+        self._add_prompt_type(types_list, dependencies)
+
+        self.create_types_dir(path, types_list, with_tests)
         
+        self.reload_config_file(path)
 
 
     @staticmethod

@@ -53,7 +53,7 @@ class InitCommand(Command):
             "dependencies",
             "d",
             "Package to require, with an optional version constraint, "
-            "e.g. langchain:^0.0.266 or langchain=0.0.266.",
+            "e.g. -d langchain=='^0.0.266'",
             flag=False,
             multiple=True,
         ),

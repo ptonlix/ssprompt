@@ -46,7 +46,8 @@ class NewCommand(Command):
         option(
             "dependencies",
             "d",
-            'Prompt depends on the environment, such as , example: -d=langchain=="^0.0.266"',
+            "Package to require, with an optional version constraint, "
+            "e.g. -d langchain=='^0.0.266'",
             flag=False,
             multiple=True,
             default=['langchan=="^0.0.266"']
