@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Mapping, Sequence, Union
 from pydantic import BaseModel, Field, validator
 
 PromptTypesList = ["text", "yaml", "json", "python"]
+PromptAllTypes = "all"
+
 class MetaConfig(BaseModel):
     name: str = Field(frozen=True)
     version: str = Field(frozen=True, regex=r'^[0-9]\d?(\.([1-9]?\d)){2}$')

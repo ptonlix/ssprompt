@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 from packaging.utils import canonicalize_name
 
-from ssprompt.core.config import Config, PyYaml, PromptTypesList
+from ssprompt.core.config import Config, PyYaml, PromptTypesList, PromptAllTypes
 
 if TYPE_CHECKING:
     from typing import Any, Dict, List, Mapping, Sequence, Union
@@ -66,7 +66,7 @@ class Layout:
         yaml_prompt: Dict[str, str | List[Dict]] | None =None,
         json_prompt: Dict[str, str | List[Dict]] | None =None,
         python_prompt: Dict[str, str | List[Dict]] | None =None,
-        conf_path: Path = Path(),
+        conf_path: Path | None = None,
     ) -> None:
         self._name = canonicalize_name(name) 
         self._version = version
@@ -85,33 +85,36 @@ class Layout:
         self._types_list = types_list
         self._dependencies = dependencies
 
-        self._ssprompt_config = self._create_ssprompt_config(conf_path) 
+        self._ssprompt_config = self.default_config.copy(deep=True) 
+        self._create_ssprompt_config(conf_path) 
 
     def _create_readme(self, path: Path) -> Path:
         readme_file = path.joinpath(f"README.{self._readme_format}")
         readme_file.touch()
         return readme_file
     
-    def _create_ssprompt_config(self, path: Path)-> Config:
-        if path.exists():
-            conf = PyYaml(path).read_config_from_yaml()
-            return conf
-        conf =  self.default_config.copy(deep=True)
-        conf.meta.name= self._name
-        conf.meta.author = self._author
-        conf.meta.version = self._version
+    def _create_ssprompt_config(self, path: Path | Any):
+        if path and path.exists():
+            self._ssprompt_config = PyYaml(path).read_config_from_yaml()
+            return
+        
+        self._ssprompt_config.meta.name= self._name
+        self._ssprompt_config.meta.author = self._author
+        self._ssprompt_config.meta.version = self._version
         if not self._description:
-            conf.meta.description = self._description
-        conf.meta.llm = self._llm
-        conf.meta.readme_format = self._readme_format
-        conf.meta.license = self._license
-        conf.meta.tag = self._tag
+            self._ssprompt_config.meta.description = self._description
+        self._ssprompt_config.meta.llm = self._llm
+        self._ssprompt_config.meta.readme_format = self._readme_format
+        self._ssprompt_config.meta.license = self._license
+        self._ssprompt_config.meta.tag = self._tag
 
         self._set_all_dependencies(self._dependencies)
         self._set_all_list_name(self._name) #Prompt类型中，默认子默认为工程名字
         self._del_prompt_type(self._types_list)
 
-        return conf
+        print(self._ssprompt_config)
+
+        return self._ssprompt_config
 
     def _add_prompt_type(self, types_list:list,  dependencies: Dict):
         for prompt_type in types_list:
@@ -138,11 +141,11 @@ class Layout:
                     raise ValueError("Incorrect Prompt Type.Optional:[text, json, yaml, python]")
     
     def _del_prompt_type(self, types_list:list):
+        if PromptAllTypes in types_list:
+            return
         del_types_list = set(PromptTypesList) - set(types_list)
         for prompt_type in del_types_list:
             match prompt_type:
-                case "all":
-                    return
                 case "text":
                     self._ssprompt_config.text_prompt = None
                 case "yaml":

@@ -50,7 +50,7 @@ class NewCommand(Command):
             "e.g. -d langchain=='^0.0.266'",
             flag=False,
             multiple=True,
-            default=['langchan=="^0.0.266"']
+            default=['langchan==^0.0.266']
         ),
     ]
 

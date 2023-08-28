@@ -1,0 +1,32 @@
+meta:
+  author:
+  - chenfudong <260431910@qq.com>
+  description: ''
+  license: MIT
+  llm:
+  - gpt-3.5-turbo
+  name: example
+  readme_format: md
+  tag:
+  - common
+  version: 0.1.0
+text_prompt:
+  dirname: text
+json_prompt:
+  dirname: json
+  list:
+  - dependencies:
+      langchan: ^0.0.266
+    name: example
+yaml_prompt:
+  dirname: yaml
+  list:
+  - dependencies:
+      langchan: ^0.0.266
+    name: example
+python_prompt:
+  dirname: python
+  list:
+  - dependencies:
+      langchan: ^0.0.266
+    name: example
