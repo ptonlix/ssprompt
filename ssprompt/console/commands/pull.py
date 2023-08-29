@@ -49,6 +49,13 @@ class PullCommand(Command):
             flag=False,
             default="github"
         ), 
+        option(
+            "dirflag",
+            None,
+            "Create a new project directory and download Prompt project",
+            flag=False,
+            default=True
+        )
     ]
     help = """\
 The <c1> pull</c1> command pull the prompt engineering project from remote Prompt Hub \
@@ -69,9 +76,10 @@ in the current directory.
         main_pro = self.option("project")
         sub_pro = self.option("subproject")
         repo_type = self.option("platfrom")
+        dirflag = self.option("dirflag")
         
         
-        gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, path)
+        gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, path, dirflag)
 
         depend_list = self.exec_prompt_hub(gitprompthub)
 
