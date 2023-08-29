@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, List, Mapping, Optional, Sequence, Union
+from typing import Any, Callable, List, Dict
 from pathlib import Path
 from pydantic import BaseModel, Field, validator
 
 class AbstractPromptHub(BaseModel,ABC):
+    
     main_project: str
     sub_project: str 
     path: Path
-
-    # def __init__(self, project: str, sub_project: str, path:Path) -> None:
-    #     self._main_project = project
-    #     self._sub_project = sub_project
-    #     self._path = path  
     
     @validator('main_project')
     def valid_main_project(cls, values: str) -> str:
@@ -31,18 +27,6 @@ class AbstractPromptHub(BaseModel,ABC):
             raise ValueError("The Path isn't directory")
         return value
 
-    # @property
-    # def main_project(self) -> str:
-    #     return self._main_project
-    
-    # @property
-    # def sub_project(self) -> str:
-    #     return self._sub_project
-
-    # @property
-    # def path(self) -> Path:
-    #     return self._path
-
     @abstractmethod
     def check_project_exists(self) -> bool:
         ...
@@ -56,6 +40,6 @@ class AbstractPromptHub(BaseModel,ABC):
         ...
     
     @abstractmethod
-    def get_project_dependencies(self, install: Optional[Callable[[Any], Any]]):
+    def get_project_dependencies(self)->List[Dict]:
         ...
 

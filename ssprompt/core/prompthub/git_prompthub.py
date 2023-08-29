@@ -46,18 +46,6 @@ class GitModel(BaseModel):
             raise ValueError("The Path isn't directory")
         return value
 
-    # @validator('git_type')
-    # def valid_git_type(cls, value: str):
-    #     if not value in cls.platform.keys():
-    #          raise ValueError("The Git Type is incorrect, [github or gitee]")
-    #     return value 
-    # def valid_git_url(cls, value: str):
-    #     parsed_url = urlparse(value)
-    #     if not (parsed_url.scheme and parsed_url.netloc):
-    #        raise ValueError("The Git Url is incorrect")
-    #     return value
-        
-
 
 class GitPromptHub(AbstractPromptHub):
 

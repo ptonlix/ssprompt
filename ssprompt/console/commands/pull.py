@@ -9,6 +9,7 @@ from ssprompt.core.config import Config
 
 from ssprompt.console.commands.command import Command
 from ssprompt.repositories import AbstractRepository, PyPiRepository
+from ssprompt.core.prompthub import AbstractPromptHub, GitPromptHub
 
 Requirements = Dict[str, Union[str, Mapping[str, Any]]]
 
@@ -60,7 +61,6 @@ in the current directory.
     def handle(self) -> int:
         
         from pathlib import Path
-        from ssprompt.core.prompthub import  GitPromptHub
 
         path = Path(self.argument("path"))
         if not path.is_absolute():
@@ -72,20 +72,13 @@ in the current directory.
         sub_pro = self.option("subproject")
         repo_type = self.option("platfrom")
         
+        
         gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, path)
 
-        gitprompthub.pull_project()
+        depend_list = self.exec_prompt_hub(gitprompthub)
 
-        depend_list = gitprompthub.get_project_dependencies()
-
-        repo = PyPiRepository()
-        no_install_depend_list=[]
-        for depend in depend_list:
-            for package_name, version  in depend.items():
-                if not repo.is_package_installed(str(package_name),version):
-                    no_install_depend_list.append(depend)
+        no_install_depend_list=self.check_no_install_package(depend_list)
         
-    
         if no_install_depend_list:
             self.line(f"<info>{depend_list} are the dependencies of the Project Prompt </info>")
             self.line(f"<info><error>{no_install_depend_list}</error> packages were not downloaded locally</info>")
@@ -106,6 +99,23 @@ in the current directory.
 
         
         return 0
+
+
+    def exec_prompt_hub(self, prompthub: AbstractPromptHub)->List[Dict]:
+        
+        prompthub.pull_project()
+
+        return prompthub.get_project_dependencies() 
+        
+    def check_no_install_package(self, depend_list: List[Dict]) ->List[Dict]:
+        repo = PyPiRepository()
+        no_install_depend_list=[]
+        for depend in depend_list:
+            for package_name, version  in depend.items():
+                if not repo.is_package_installed(str(package_name),version):
+                    no_install_depend_list.append(depend)
+        return no_install_depend_list
+        
 
     def install_package(self, depend_list: List[Dict]):
         repo = PyPiRepository()

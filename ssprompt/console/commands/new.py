@@ -120,7 +120,5 @@ class NewCommand(Command):
         layout_.create(path)
 
 
-
-
         return 0
 
