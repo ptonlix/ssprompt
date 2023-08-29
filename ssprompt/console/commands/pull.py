@@ -11,8 +11,6 @@ from ssprompt.console.commands.command import Command
 from ssprompt.repositories import AbstractRepository, PyPiRepository
 from ssprompt.core.prompthub import AbstractPromptHub, GitPromptHub
 
-Requirements = Dict[str, Union[str, Mapping[str, Any]]]
-
 
 class PullCommand(Command):
 
