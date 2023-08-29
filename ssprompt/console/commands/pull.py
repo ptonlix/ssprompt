@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any, Dict, Mapping, Union
+from typing import TYPE_CHECKING, Any, Dict, Mapping, Union, List
 
 from cleo.helpers import argument, option
 from packaging.utils import canonicalize_name
@@ -22,14 +22,35 @@ class PullCommand(Command):
     description = "Pull the prompt engineering project from remote Prompt Hub"
     
     arguments = [
-        argument("project", "the prompt engineering project name"),
         argument(
             "path", 
             "The path to create the project at.",
             optional=True,
             default=".")
         ]
-    
+    options = [ 
+        option(
+            "project", 
+            "m", 
+            "Set the prompt main project name. eg. ptonlix/PromptHub", 
+            flag=False,
+            default="ptonlix/PromptHub",
+        ),
+        option(
+            "subproject", 
+            "s", 
+            "Set the prompt sub project name. eg. example", 
+            flag=False,
+            default = ""
+        ),
+        option(
+            "platfrom",
+            "p",
+            "Choose Prompt Engineering Warehouse Platform. option: [github gitee]",
+            flag=False,
+            default="github"
+        ), 
+    ]
     help = """\
 The <c1> pull</c1> command pull the prompt engineering project from remote Prompt Hub \
 in the current directory.
@@ -39,6 +60,7 @@ in the current directory.
     def handle(self) -> int:
         
         from pathlib import Path
+        from ssprompt.core.prompthub import  GitPromptHub
 
         path = Path(self.argument("path"))
         if not path.is_absolute():
@@ -46,6 +68,48 @@ in the current directory.
             # for path.resolve(strict=False)
             path = Path.cwd().joinpath(path)
         
+        main_pro = self.option("project")
+        sub_pro = self.option("subproject")
+        repo_type = self.option("platfrom")
+        
+        gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, path)
+
+        gitprompthub.pull_project()
+
+        depend_list = gitprompthub.get_project_dependencies()
+
+        repo = PyPiRepository()
+        no_install_depend_list=[]
+        for depend in depend_list:
+            for package_name, version  in depend.items():
+                if not repo.is_package_installed(str(package_name),version):
+                    no_install_depend_list.append(depend)
+        
+    
+        if no_install_depend_list:
+            self.line(f"<info>{depend_list} are the dependencies of the Project Prompt </info>")
+            self.line(f"<info><error>{no_install_depend_list}</error> packages were not downloaded locally</info>")
+
+            question_text = "Would you like to download these dependencies?"
+            help_message = """\
+    Download these dependency packages locally through pip)
+    """     
+            if self.confirm(question_text, True):
+                if self.io.is_interactive():
+                    self.line(help_message)
+                    self.install_package(no_install_depend_list) 
+                if self.io.is_interactive():
+                    self.line("")
+
+        self.add_style('fire', fg='red', bg='blue', options=['bold', 'blink'])
+        self.line(f"<info> The <fire>{main_pro} {sub_pro} </fire> Prompt Project pull completed, enjoy AI!</info>") 
+
         
         return 0
 
+    def install_package(self, depend_list: List[Dict]):
+        repo = PyPiRepository()
+        for depend in depend_list:
+            for package_name, version  in depend.items():
+                install_verison =  repo.find_compatible_version(package_name, version)
+                repo.install_package(package_name, install_verison)

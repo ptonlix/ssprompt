@@ -73,7 +73,7 @@ class GitPromptHub(AbstractPromptHub):
         "gitee":{}
     }
 
-    def __init__(self, git_type:str, main_project:str, path:Path, sub_project: str="", dir_flag:bool = True) -> None:
+    def __init__(self, git_type:str, main_project:str, sub_project:str, path:Path, dir_flag:bool = True) -> None:
         super().__init__(main_project=main_project, sub_project=sub_project, path=path)
         if not git_type in self.platform.keys():
              raise ValueError("The Git Type is incorrect, [github or gitee]")  

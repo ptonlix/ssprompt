@@ -53,7 +53,7 @@ class InitCommand(Command):
             "dependencies",
             "d",
             "Package to require, with an optional version constraint, "
-            "e.g. -d langchain=='^0.0.266'",
+            "e.g. -d langchain@^0.0.266",
             flag=False,
             multiple=True,
         ),
@@ -224,9 +224,9 @@ You can specify a package in the following forms:
         result = {}
 
         for depend in requires:
-            if "==" not in depend:
-                raise ValueError('The input format of dependencies is incorrect. eg. -d langchain=="^0.0.266"')
-            depend_sub_list = depend.split("==")
+            if "@" not in depend:
+                raise ValueError('The input format of dependencies is incorrect. eg. -d langchain@^0.0.266')
+            depend_sub_list = depend.split("@")
             result[depend_sub_list[0]] = depend_sub_list[1]
 
         question = self.create_question(

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from time import sleep
 from typing import Any, Dict, List, Mapping, Sequence, Union
-
+import langchain
 from pydantic import BaseModel, Field, validator
 
 PromptTypesList = ["text", "yaml", "json", "python"]

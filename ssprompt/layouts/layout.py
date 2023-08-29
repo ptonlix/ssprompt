@@ -112,7 +112,6 @@ class Layout:
         self._set_all_list_name(self._name) #Prompt类型中，默认子默认为工程名字
         self._del_prompt_type(self._types_list)
 
-        print(self._ssprompt_config)
 
         return self._ssprompt_config
 
@@ -220,7 +219,6 @@ Please use the new or init command to initialize the project")
                 case "all":
                     self._create_all_dir(path, with_tests)
                 case "text":
-                    print(123)
                     self._create_prompt_dir(path, self._ssprompt_config.text_prompt) 
                 case "yaml":
                     self._create_prompt_dir(path, self._ssprompt_config.yaml_prompt) 

@@ -36,10 +36,10 @@ class AddCommand(Command):
             "dependencies",
             "d",
             "Package to require, with an optional version constraint, "
-            "e.g. -d langchain=='^0.0.266'",
+            "e.g. -d langchain@^0.0.266",
             flag=False,
             multiple=True,
-            default=['langchan=="^0.0.266"']
+            default=['langchain@^0.0.266']
         ),
     ]
 
@@ -63,9 +63,9 @@ in the current directory.
         depend_list = self.option("dependencies")
         depend_obj = {}
         for depend in depend_list:
-            if not depend.find("=="):
-                raise ValueError('The input format of dependencies is incorrect. eg. -d langchain=="^0.0.266"')
-            depend_sub_list = depend.split("==")
+            if not depend.find("@"):
+                raise ValueError('The input format of dependencies is incorrect. eg. -d langchain@^0.0.266')
+            depend_sub_list = depend.split("@")
             depend_obj[depend_sub_list[0]] = depend_sub_list[1]
 
         layout_ = layout_cls(
