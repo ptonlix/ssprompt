@@ -49,10 +49,7 @@ class PyPiRepository(AbstractRepository):
     def is_package_installed(self, package_name: str, required_version=None):
         try:
             installed_version = metadata.version(package_name)
-            if required_version:
-                # required_version = packaging_version.parse(required_version)
-                # installed_version = packaging_version.parse(installed_version)
-                # return installed_version >= required_version
+            if required_version: 
                 return self.check_version_constraint(installed_version, required_version)
             return True
         except metadata.PackageNotFoundError:

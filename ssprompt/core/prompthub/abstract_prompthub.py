@@ -6,7 +6,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, validator
 
 class AbstractPromptHub(BaseModel,ABC):
-    
+
     main_project: str
     sub_project: str 
     path: Path
@@ -33,6 +33,10 @@ class AbstractPromptHub(BaseModel,ABC):
 
     @abstractmethod
     def get_project_meta(self)->Any:
+        ...
+    
+    @abstractmethod
+    def get_remote_project_meta(self) -> Any: 
         ...
 
     @abstractmethod

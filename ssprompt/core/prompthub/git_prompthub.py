@@ -61,7 +61,7 @@ class GitPromptHub(AbstractPromptHub):
         "gitee":{}
     }
 
-    def __init__(self, git_type:str, main_project:str, sub_project:str, path:Path, dir_flag:bool = True) -> None:
+    def __init__(self, git_type:str, main_project:str, sub_project:str, path:Path=Path("."), dir_flag:bool = True) -> None:
         super().__init__(main_project=main_project, sub_project=sub_project, path=path)
         if not git_type in self.platform.keys():
              raise ValueError("The Git Type is incorrect, [github or gitee]")  
@@ -97,7 +97,34 @@ class GitPromptHub(AbstractPromptHub):
             meta_file = self.sub_project.split("/")[-1] + ".yaml"
         meta_file = self._save_path.joinpath(meta_file)
         return PyYaml(meta_file).read_config_from_yaml()
-    
+
+    def get_remote_project_meta(self) -> Config | Any: 
+        remote_file_path = ""
+        if not self.sub_project:
+            meta_file = self.main_project.split("/")[1] + ".yaml"
+            remote_file_path = self._platfrom.get("content", "").format(repo_url=self.main_project, file_path=meta_file)
+        else:
+            meta_file =  self.sub_project + "/" + self.sub_project.split("/")[-1] + ".yaml"
+            remote_file_path = self._platfrom.get("content", "").format(repo_url=self.main_project, file_path=meta_file)
+
+        response = self._session.get(remote_file_path)
+
+        if response.status_code == 200:
+            content_obj = self._parse_github_response(response)
+            download_url = content_obj['download_url']
+
+            response = self._session.get(download_url)
+            if response.status_code == 200:
+                return PyYaml.read_config_from_str(response.content)
+            else:
+                logger.error(f"Failed to fetch remote meta content, Status code: {response.status_code}")
+                logger.error(f"{response.text}") 
+        else:
+            logger.error(f"Failed to fetch remote meta content, Status code: {response.status_code}")
+            logger.error(f"{response.text}") 
+
+        return  None
+
     def pull_project(self): 
         if not os.path.exists(self._save_path):
             os.makedirs(self._save_path)
@@ -203,8 +230,11 @@ class GitPromptHub(AbstractPromptHub):
             return sha1_obj.hexdigest()
 
 if __name__ == "__main__":
-   gitprompthub = GitPromptHub("github", "ptonlix/PromptHub", Path("."), sub_project="example") 
+   gitprompthub = GitPromptHub("github", "ptonlix/PromptHub", "example", Path(".")) 
 
-   print(gitprompthub.check_project_exists())
-   gitprompthub.pull_project()
-   print(gitprompthub.get_project_dependencies())
+
+#    print(gitprompthub.check_project_exists())
+#    gitprompthub.pull_project()
+#    print(gitprompthub.get_project_dependencies())
+
+   print(gitprompthub.get_remote_project_meta().json())

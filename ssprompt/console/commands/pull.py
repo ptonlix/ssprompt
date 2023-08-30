@@ -44,8 +44,8 @@ class PullCommand(Command):
             default = ""
         ),
         option(
-            "platfrom",
-            "p",
+            "platform",
+            None,
             "Choose Prompt Engineering Warehouse Platform. option: [github gitee]",
             flag=False,
             default="github"
@@ -76,7 +76,7 @@ in the current directory.
         
         main_pro = self.option("project")
         sub_pro = self.option("subproject")
-        repo_type = self.option("platfrom")
+        repo_type = self.option("platform")
         dirswitch = self.option("dirflag")
 
         dirflag = False if dirswitch == "off" else True
