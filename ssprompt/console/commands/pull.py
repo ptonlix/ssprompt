@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, Mapping, Union, List
 
 from cleo.helpers import argument, option
 from packaging.utils import canonicalize_name
+from sympy import true
 from ssprompt.core.config import Config
 
 from ssprompt.console.commands.command import Command
@@ -52,9 +53,9 @@ class PullCommand(Command):
         option(
             "dirflag",
             None,
-            "Create a new project directory and download Prompt project",
+            "Switch[on or off]: Create a new project directory and download Prompt project",
             flag=False,
-            default=True
+            default="on"
         )
     ]
     help = """\
@@ -76,8 +77,9 @@ in the current directory.
         main_pro = self.option("project")
         sub_pro = self.option("subproject")
         repo_type = self.option("platfrom")
-        dirflag = self.option("dirflag")
-        
+        dirswitch = self.option("dirflag")
+
+        dirflag = False if dirswitch == "off" else True
         
         gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, path, dirflag)
 
