@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
         return self._ssprompt
 
-    def set_poetry(self, ssprompt: Ssprompt) -> None:
+    def set_ssprompt(self, ssprompt: Ssprompt) -> None:
         self._ssprompt = ssprompt
 
     def get_application(self) -> Application:

@@ -65,7 +65,6 @@ in the current directory.
     loggers = ["ssprompt.core.vcs.git"] 
 
     def handle(self) -> int:
-        
         from pathlib import Path
 
         path = Path(self.argument("path"))
@@ -81,7 +80,8 @@ in the current directory.
 
         dirflag = False if dirswitch == "off" else True
         
-        gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, path, dirflag)
+        gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, 
+                                    self.ssprompt.github_access_key, path, dirflag)
 
         depend_list = self.exec_prompt_hub(gitprompthub)
 

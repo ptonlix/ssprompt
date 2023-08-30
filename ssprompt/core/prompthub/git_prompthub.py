@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
+from email import header
 import platform
 from time import sleep
 from typing import Any, Callable, List, Mapping, Optional, Sequence, Union, Dict
 from pathlib import Path
+from wsgiref import headers
 
 from numpy import savez_compressed
 from ssprompt.core.prompthub.abstract_prompthub import AbstractPromptHub
@@ -16,6 +18,16 @@ import time
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
+
+"""
+    访问github等失败尝试次数
+"""
+MAX_RETRIES = 3
+
+"""
+    访问github等失败尝试延迟时间(ms)
+"""
+RETRY_DELAY = 200
 
 class GitModel(BaseModel):
     #git_type: str 
@@ -52,6 +64,7 @@ class GitPromptHub(AbstractPromptHub):
     _platfrom: Dict =  PrivateAttr()
     _session: Any = PrivateAttr()
     _dir_flag: bool = PrivateAttr()
+    _access_key: str = PrivateAttr() 
 
     platform:  Dict[str,Dict[Any, Any]] = {
         "github":{
@@ -61,13 +74,19 @@ class GitPromptHub(AbstractPromptHub):
         "gitee":{}
     }
 
-    def __init__(self, git_type:str, main_project:str, sub_project:str, path:Path=Path("."), dir_flag:bool = True) -> None:
+    def __init__(self, git_type:str, main_project:str, sub_project:str, access_key:str, path:Path=Path("."), dir_flag:bool = True) -> None:
         super().__init__(main_project=main_project, sub_project=sub_project, path=path)
         if not git_type in self.platform.keys():
              raise ValueError("The Git Type is incorrect, [github or gitee]")  
         self._platfrom = self.platform.get(git_type, {})
         self._session = requests.Session()
+        if access_key:
+            self._session.headers.update({
+            'Authorization': f'token {access_key}'
+            })
+    
         self._dir_flag = dir_flag
+        self._access_key = access_key
 
     @property
     def _save_path(self)->Path:
@@ -98,7 +117,7 @@ class GitPromptHub(AbstractPromptHub):
         meta_file = self._save_path.joinpath(meta_file)
         return PyYaml(meta_file).read_config_from_yaml()
 
-    def get_remote_project_meta(self) -> Config | Any: 
+    def get_remote_project_meta(self, max_retries:int=MAX_RETRIES, retry_delay: int=RETRY_DELAY) -> Config | Any: 
         remote_file_path = ""
         if not self.sub_project:
             meta_file = self.main_project.split("/")[1] + ".yaml"
@@ -107,21 +126,27 @@ class GitPromptHub(AbstractPromptHub):
             meta_file =  self.sub_project + "/" + self.sub_project.split("/")[-1] + ".yaml"
             remote_file_path = self._platfrom.get("content", "").format(repo_url=self.main_project, file_path=meta_file)
 
-        response = self._session.get(remote_file_path)
+        for attempt in range(max_retries + 1):
+            response = self._session.get(remote_file_path)
 
-        if response.status_code == 200:
-            content_obj = self._parse_github_response(response)
-            download_url = content_obj['download_url']
-
-            response = self._session.get(download_url)
             if response.status_code == 200:
-                return PyYaml.read_config_from_str(response.content)
+                content_obj = self._parse_github_response(response)
+                download_url = content_obj['download_url']
+
+                response = self._session.get(download_url)
+                if response.status_code == 200:
+                    return PyYaml.read_config_from_str(response.content)
+                else:
+                    logger.error(f"Failed to fetch remote meta content, Status code: {response.status_code}")
+                    logger.error(f"{response.text}") 
             else:
-                logger.error(f"Failed to fetch remote meta content, Status code: {response.status_code}")
-                logger.error(f"{response.text}") 
-        else:
-            logger.error(f"Failed to fetch remote meta content, Status code: {response.status_code}")
-            logger.error(f"{response.text}") 
+                logger.warning(f"Failed to fetch remote meta content, Status code: {response.status_code}")
+                if attempt < max_retries:
+                    logger.warning(f"Retrying in {retry_delay} millisecond...")
+                    time.sleep(retry_delay/1000)
+                else:
+                    logging.error("Max retry attempts reached.\n Please check and try again")
+                    break
 
         return  None
 
@@ -189,7 +214,7 @@ class GitPromptHub(AbstractPromptHub):
             logger.error(f"Failed to fetch directory content, Status code: {response.status_code}")
             logger.error(f"{response.text}") 
 
-    def _download_file(self, url, save_path, sha, max_retries:int=3, retry_delay: int=200):
+    def _download_file(self, url, save_path, sha, max_retries:int=MAX_RETRIES, retry_delay: int=RETRY_DELAY):
         if os.path.exists(save_path):
             if self._check_file_sha(save_path, sha):
                 logger.info(f"File '{save_path}' already exists with matching SHA, skipping.")

@@ -100,7 +100,7 @@ including remote or local.
         sub_pro = self.option("subproject")
         repo_type = self.option("platform")
 
-        gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro)
+        gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, self.ssprompt.github_access_key)
         config = self.exec_prompt_hub(gitprompthub)
 
         if not config:

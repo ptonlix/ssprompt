@@ -17,6 +17,7 @@ from cleo.io.null_io import NullIO
 from ssprompt.__version__ import __version__
 from ssprompt.console.command_loader import CommandLoader
 from ssprompt.console.commands.command import Command
+from ssprompt.ssprompt import Ssprompt
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -68,6 +69,19 @@ class Application(BaseApplication):
 
         command_loader = CommandLoader({name: load_command(name) for name in COMMANDS})
         self.set_command_loader(command_loader)
+
+    @property
+    def ssprompt(self) -> Ssprompt:
+
+        if self._ssprompt is not None:
+            return self._ssprompt
+
+        self._ssprompt = Ssprompt()
+
+        return self._ssprompt
+
+    def reset_ssprompt(self) -> None:
+        self._ssprompt = None
 
     def create_io(
         self,
