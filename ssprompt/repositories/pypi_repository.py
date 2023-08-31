@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 import logging
 import requests
 import re
-from packaging import version as packaging_version
 
 from ssprompt.repositories.abstract_repository import AbstractRepository
 
@@ -56,22 +55,6 @@ class PyPiRepository(AbstractRepository):
             return False
 
 
-    def get_related_packages(self, package_name):
-        from bs4 import BeautifulSoup
-        response = requests.get(self._index +"/"+ package_name + "/")
-        if response.status_code == 200:
-            packages = []
-            soup = BeautifulSoup(response.text, "html.parser")
-            links = soup.find_all("a")
-            for link in links:
-                package_info = link.get("href")
-                if package_info.endswith("/"):
-                    package_name, package_version = package_info.rstrip("/").rsplit("-", 1)
-                    packages.append((package_name, package_version))
-            return packages
-        else:
-            return []
-        
     def check_version_constraint(self, version, constraint):
         if constraint.startswith("^"):
             return self._check_caret_requirement(version, constraint)

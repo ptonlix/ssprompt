@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from contextlib import suppress
-import platform
 from typing import TYPE_CHECKING, Any, Dict, Mapping, Union, List
 
 from cleo.helpers import argument, option

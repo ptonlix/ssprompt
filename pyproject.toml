@@ -5,10 +5,18 @@ description = ""
 authors = ["chenfudong <260431910@qq.com>"]
 readme = "README.md"
 
+[tool.poetry.scripts]
+ssprompt = "ssprompt.console.application:main"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 cleo = "^2.0.1"
 requests = "^2.31.0"
+tqdm = "^4.66.1"
+pydantic = "1.10.12"
+pyyaml = "6.0.1"
+packaging = "23.1"
+importlib-metadata = "6.8.0"
 
 
 [build-system]

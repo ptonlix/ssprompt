@@ -44,5 +44,4 @@ __all__ = [
     "decode",
     "encode",
     "metadata",
-    "tomllib",
 ]

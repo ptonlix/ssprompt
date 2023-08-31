@@ -6,7 +6,6 @@ import re
 from typing import TYPE_CHECKING
 
 import yaml
-import shutil
 
 from ssprompt.core.config import Config
 

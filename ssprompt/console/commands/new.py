@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from contextlib import suppress
 
 from cleo.helpers import argument, option
 

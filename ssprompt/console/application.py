@@ -28,8 +28,6 @@ if TYPE_CHECKING:
     from cleo.io.inputs.input import Input
     from cleo.io.io import IO
     from cleo.io.outputs.output import Output
-    from crashtest.solution_providers.solution_provider_repository import \
-        SolutionProviderRepository
 
     from ssprompt.ssprompt import Ssprompt
 

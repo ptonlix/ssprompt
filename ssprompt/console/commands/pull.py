@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from contextlib import suppress
 from typing import TYPE_CHECKING, Any, Dict, Mapping, Union, List
 
 from cleo.helpers import argument, option
 from packaging.utils import canonicalize_name
-from sympy import true
 from ssprompt.core.config import Config
 
 from ssprompt.console.commands.command import Command
