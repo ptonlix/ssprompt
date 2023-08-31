@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any, Dict, Mapping, Union, List
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Union
 
 from cleo.helpers import argument, option
 from packaging.utils import canonicalize_name
-from ssprompt.core.config import Config
 
 from ssprompt.console.commands.command import Command
-from ssprompt.repositories import AbstractRepository, PyPiRepository
+from ssprompt.core.config import Config
 from ssprompt.core.prompthub import AbstractPromptHub, GitPromptHub
+from ssprompt.repositories import AbstractRepository, PyPiRepository
 
 
 class VersionCommand(Command):
@@ -38,6 +38,7 @@ The version command shows the current version of the project.
     def handle(self) -> int:
 
         from pathlib import Path
+
         from ssprompt.core.config import PyYaml
 
         path = Path.cwd()

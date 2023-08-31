@@ -8,7 +8,7 @@ from ssprompt.console.commands.command import Command
 
 class NewCommand(Command):
     name = "new"
-    description = "Creates a new Prompt project at <path>."
+    description = "Creates a new prompt engineering project at <path>."
 
     arguments = [
         argument("path", "The path to create the project at."),

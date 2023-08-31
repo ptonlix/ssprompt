@@ -48,7 +48,6 @@ COMMANDS = [
     "new",
     "pull",
     "show",
-    "update",
     "version",
 ]
 
