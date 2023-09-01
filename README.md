@@ -6,7 +6,8 @@
 	</p>
 	<p align="center">
 		<font size=6 face="雅黑">⚡A LLM Prompt 分发管理工具⚡</font>
-		<br>
+	<p>
+	<p align="center">
 		<b face="雅黑">Change the world, even a little bit.</b>
 	<p>
 </p>
