@@ -2,7 +2,7 @@
 name = "ssprompt"
 version = "0.1.0"
 description = ""
-authors = ["chenfudong <260431910@qq.com>"]
+authors = ["ptonlix <baird0917@163.com>"]
 readme = "README.md"
 
 [tool.poetry.scripts]
