@@ -5,7 +5,8 @@
 		<img height=120 src="https://img.gejiba.com/images/e1945208195b199bd244431fd2a6efa0.png">
 	</p>
 	<p align="center">
-		<font size=6 face="雅黑">⚡A LLM Prompt distribution tool⚡</font><br>
+		<font size=6 face="雅黑">⚡A LLM Prompt 分发管理工具⚡</font>
+		<br>
 		<b face="雅黑">Change the world, even a little bit.</b>
 	<p>
 </p>
@@ -21,7 +22,9 @@
 
 ## 🚀 Quick Install
 ### 系统依赖
-Ssprompt requires Python 3.10+ ⭐ 支持多平台使用，满足广大Prompt Engineer💻
+Ssprompt requires Python 3.10+ 
+
+⭐ 支持多平台使用，满足广大Prompt Engineer💻
 ### pip安装
 `pip install ssprompt`
 ### Linux, macOS, Windows (WSL)
