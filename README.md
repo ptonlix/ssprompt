@@ -5,9 +5,7 @@
 		<img height=120 src="https://img.gejiba.com/images/e1945208195b199bd244431fd2a6efa0.png">
 	</p>
 	<p align="center">
-		<font size=6 face="雅黑">⚡A LLM Prompt 分发管理工具⚡</font>
-	<p>
-	<p align="center">
+		<img src="https://img.gejiba.com/images/605bd1bcc1a14f803f1d8f68b8c1c892.png"><br>
 		<b face="雅黑">Change the world, even a little bit.</b>
 	<p>
 </p>
