@@ -25,12 +25,17 @@ Ssprompt requires Python 3.10+
 
 ⭐ 支持多平台使用，满足广大Prompt Engineer💻
 ### pip安装
-`pip install ssprompt`
+```shell
+pip install ssprompt
+```
 ### Linux, macOS, Windows (WSL)
-`curl -sSL https://raw.githubusercontent.com/ptonlix/ssprompt/main/install.py | python3 -`
+```shell
+curl -sSL https://raw.githubusercontent.com/ptonlix/ssprompt/main/install.py | python3 -
+```
 ### Windows (Powershell)
-`(Invoke-WebRequest -Uri https://raw.githubusercontent.com/ptonlix/ssprompt/main/install.py -UseBasicParsing).Content | py -`
-
+```shell
+(Invoke-WebRequest -Uri https://raw.githubusercontent.com/ptonlix/ssprompt/main/install.py -UseBasicParsing).Content | py -
+```
 
 ## What it can do?
 ssprompt是一个Prompt分发管理工具，定义了一套Prompt分发规则，支持创建Prompt工程和拉取[Prompt Hub](https://github.com/ptonlix/PromptHub)上对应Prompt的工程文件到本地工程。
