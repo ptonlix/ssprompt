@@ -198,8 +198,6 @@ You can specify a package in the following forms:
                 self.line("")
 
 
-        print(name, version, description, author_list, license, types_list, llm_list, tag_list, requirements)
-
         layout_ = layout_cls(
             name,
             version,
@@ -246,7 +244,6 @@ You can specify a package in the following forms:
                 self.line_error("<error>Unable to find package</error>")
                 package = False
             else:
-                print(123123)
                 question = self.create_question(
                     "Enter the version constraint to require "
                     "(or leave blank to use the latest version):"
