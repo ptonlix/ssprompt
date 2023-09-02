@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 SSPROMPT_DEFAULT = """\
 meta:
   author:
-  - ptonlix <260431910@qq.com>
+  - ptonlix <baird0917@163.com>
   description: ''
   license: MIT
   llm:
