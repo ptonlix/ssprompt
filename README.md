@@ -125,6 +125,7 @@ python_prompt:	#目录名称，默认为yaml
 	- 1.2.*
 * laster                
 	- 支持最新版本
+
 ## 🌊 PromptHub
 目前ssprompt生成的Prompt工程，依赖Git管理，通过Git将Prompt工程上传到Git仓库以便ssprompt拉取引用
 
@@ -135,6 +136,14 @@ python_prompt:	#目录名称，默认为yaml
 后续会陆续收集和建设更多Prompt工程发布到我们PromptHub ☁️
 
 🍗 欢迎大家上传自己的Prompt到PromptHub，共建一个开源的Prompt生态
+#### GitHub Token
+由于目前GitHub API请求访问限制，不采用authentication访问，会限制一个小时只能访问60次，导致使用ssprompt频繁拉取工程时存在403限制请求
+
+**推荐在使用ssprompt时，设置GitHub Personal access tokens到环境变量**
+```shell
+export GITHUB_ACCESS_KEY=`Your GitHub Token`
+```
+
 
 ## 🚩 Roadmap
 - [x] 搭建ssprompt初步框架，完善基本功能
