@@ -46,6 +46,7 @@ curl -sSL https://raw.githubusercontent.com/ptonlix/ssprompt/main/install.py | p
 
 _注：以下为 0.1.0 第一版ssprompt的内容介绍，项目还在持续完善，如有疏漏或不足之处请包涵了解，谢谢~_
 
+![ssprompt show](https://img.gejiba.com/images/343c5e8b220f5e498f1a192ece4b14d4.gif)
 
 ### 命令介绍 
 - ssprompt new   ->  新建一个新的Prompt工程，指定工程目录，Prompt类型等参数
