@@ -132,12 +132,12 @@ python_prompt:	#目录名称，默认为yaml
 
 目前PromptHub的Prompt工程还在持续建设中 🕜
 
-后续会陆续收集和建设更多Prompt工程到我们PromptHub ☁️
+后续会陆续收集和建设更多Prompt工程发布到我们PromptHub ☁️
 
 🍗 欢迎大家上传自己的Prompt到PromptHub，共建一个开源的Prompt生态
 
 ## 🚩 Roadmap
-
+- [x] 搭建ssprompt初步框架，完善基本功能
 - [ ] 完善ssprompt命令  
    - [ ] pull命令支持拉取特定类型Prompt工程到本地
    - [ ] show命令支持展示更多PromptHub信息
