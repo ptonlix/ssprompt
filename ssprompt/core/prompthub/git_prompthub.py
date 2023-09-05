@@ -90,7 +90,10 @@ class GitPromptHub(AbstractPromptHub):
     @property
     def _directory_path(self)->str:
         if self._types_flag:
-            return self.sub_project+ "/"+ self.types + "/" + self.project_name if not self.typedir else self.typedir
+            if self.types == "text":
+                return self.sub_project+ "/"+ self.types 
+            else: 
+                return self.sub_project+ "/"+ self.types + "/" + self.project_name if not self.typedir else self.typedir
         return self.sub_project
     
     @property
