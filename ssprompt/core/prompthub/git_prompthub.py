@@ -61,6 +61,7 @@ class GitPromptHub(AbstractPromptHub):
     _session: Any = PrivateAttr()
     _dir_flag: bool = PrivateAttr()
     _access_key: str = PrivateAttr() 
+    _types_flag: bool = PrivateAttr()
 
     platform:  Dict[str,Dict[Any, Any]] = {
         "github":{
@@ -70,8 +71,8 @@ class GitPromptHub(AbstractPromptHub):
         "gitee":{}
     }
 
-    def __init__(self, git_type:str, main_project:str, sub_project:str, access_key:str, path:Path=Path("."), dir_flag:bool = True) -> None:
-        super().__init__(main_project=main_project, sub_project=sub_project, path=path)
+    def __init__(self, git_type:str, main_project:str, sub_project:str, access_key:str, types:str, typedir:str, path:Path=Path("."), dir_flag:bool = True) -> None:
+        super().__init__(main_project=main_project, sub_project=sub_project, path=path, types=types, typedir=typedir)
         if not git_type in self.platform.keys():
              raise ValueError("The Git Type is incorrect, [github or gitee]")  
         self._platfrom = self.platform.get(git_type, {})
@@ -84,15 +85,33 @@ class GitPromptHub(AbstractPromptHub):
         self._dir_flag = dir_flag
         self._access_key = access_key
 
+        self._types_flag = True if types else False
+    
+    @property
+    def _directory_path(self)->str:
+        if self._types_flag:
+            return self.sub_project+ "/"+ self.types + "/" + self.project_name if not self.typedir else self.typedir
+        return self.sub_project
+    
+    @property
+    def project_name(self)->str:
+        name = None
+        if not self.sub_project:
+            name = self.main_project.split("/")[1]
+        else:
+            name = self.sub_project.split("/")[-1] 
+
+        return name 
+
+    @property
+    def metafile_name(self)->str:
+        return self.project_name + ".yaml"
+    
     @property
     def _save_path(self)->Path:
         save_path = None
         if self._dir_flag:
-            if not self.sub_project:
-                dir_name = self.main_project.split("/")[1]
-            else:
-                dir_name = self.sub_project.split("/")[-1] 
-            save_path = self.path.joinpath(dir_name)
+            save_path = self.path.joinpath(self.project_name)
         else:
             save_path = self.path
         return save_path 
@@ -105,21 +124,18 @@ class GitPromptHub(AbstractPromptHub):
         return response.status_code == 200
     
     def get_project_meta(self)->Config:
-        meta_file = ""
-        if not self.sub_project:
-            meta_file = self.main_project.split("/")[1] + ".yaml"
-        else:
-            meta_file = self.sub_project.split("/")[-1] + ".yaml"
-        meta_file = self._save_path.joinpath(meta_file)
+        # 如果只获取其中一个则，只能通过远端仓库获取Meta信息
+        if self._types_flag:
+            return self.get_remote_project_meta() 
+        meta_file = self._save_path.joinpath(self.metafile_name)
         return PyYaml(meta_file).read_config_from_yaml()
 
     def get_remote_project_meta(self, max_retries:int=MAX_RETRIES, retry_delay: int=RETRY_DELAY) -> Config | Any: 
         remote_file_path = ""
         if not self.sub_project:
-            meta_file = self.main_project.split("/")[1] + ".yaml"
-            remote_file_path = self._platfrom.get("content", "").format(repo_url=self.main_project, file_path=meta_file)
+            remote_file_path = self._platfrom.get("content", "").format(repo_url=self.main_project, file_path=self.metafile_name)
         else:
-            meta_file =  self.sub_project + "/" + self.sub_project.split("/")[-1] + ".yaml"
+            meta_file =  self.sub_project + "/" + self.metafile_name
             remote_file_path = self._platfrom.get("content", "").format(repo_url=self.main_project, file_path=meta_file)
 
         for attempt in range(max_retries + 1):
@@ -134,7 +150,7 @@ class GitPromptHub(AbstractPromptHub):
                     return PyYaml.read_config_from_str(response.content)
                 else:
                     logger.error(f"Failed to fetch remote meta content, Status code: {response.status_code}")
-                    logger.error(f"{response.text}") 
+                    logger.debug(f"{response.text}") 
             else:
                 logger.warning(f"Failed to fetch remote meta content, Status code: {response.status_code}")
                 if attempt < max_retries:
@@ -149,18 +165,19 @@ class GitPromptHub(AbstractPromptHub):
     def pull_project(self): 
         if not os.path.exists(self._save_path):
             os.makedirs(self._save_path)
-        self._download_github_directory(self.sub_project, self._save_path)
+        self._download_github_directory(self._directory_path, self._save_path)
     
     def get_project_dependencies(self) ->List[Dict]:
         depend_list = []
         meta_obj = self.get_project_meta()
-        if meta_obj.json_prompt:
+    
+        if meta_obj.json_prompt and not self.types or self.types == "json":
             for sub_prompt in meta_obj.json_prompt["list"]:
                 depend_list.append(sub_prompt.get("dependencies"))
-        if meta_obj.yaml_prompt:
+        if meta_obj.yaml_prompt and not self.types or self.types == "yaml":
             for sub_prompt in meta_obj. yaml_prompt["list"]:
                 depend_list.append(sub_prompt.get("dependencies")) 
-        if meta_obj.python_prompt:
+        if meta_obj.python_prompt and not self.types or self.types == "python":
             for sub_prompt in meta_obj. python_prompt["list"]:
                 depend_list.append(sub_prompt.get("dependencies")) 
         return self._set_dependencies_list(depend_list)
@@ -208,7 +225,7 @@ class GitPromptHub(AbstractPromptHub):
                     self._download_file(item_download_url, item_save_path, item_sha)
         else:
             logger.error(f"Failed to fetch directory content, Status code: {response.status_code}")
-            logger.error(f"{response.text}") 
+            logger.debug(f"{response.text}") 
 
     def _download_file(self, url, save_path, sha, max_retries:int=MAX_RETRIES, retry_delay: int=RETRY_DELAY):
         if os.path.exists(save_path):
@@ -245,7 +262,7 @@ class GitPromptHub(AbstractPromptHub):
         with open(file_path, "r") as f:
             content = f.read()
             sha1_obj = sha1()
-            content = content.encode('ascii')	# 以二进制编码
+            content = content.encode()
             content = b'blob %d\0' % len(content) + content
             sha1_obj.update(content)
             return sha1_obj.hexdigest()

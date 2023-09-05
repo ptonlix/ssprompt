@@ -10,7 +10,6 @@ from ssprompt.console.commands.command import Command
 from ssprompt.repositories import AbstractRepository, PyPiRepository
 from ssprompt.core.prompthub import AbstractPromptHub, GitPromptHub
 
-
 class PullCommand(Command):
 
     def __init__(self) -> None:
@@ -49,6 +48,18 @@ class PullCommand(Command):
             default="github"
         ), 
         option(
+            "types",
+             "t", 
+            "Specify the Prompt file type, option: [text,json,yaml,python]",
+            flag=False,
+        ),
+         option(
+            "typedir",
+             None, 
+            "Description Directory name of the corresponding type. The default value is the current project name",
+            flag=False,
+        ),
+        option(
             "dirflag",
             None,
             "Switch[on or off]: Create a new project directory and download Prompt project",
@@ -74,12 +85,16 @@ in the current directory.
         main_pro = self.option("project")
         sub_pro = self.option("subproject")
         repo_type = self.option("platform")
+        types = self.option("types")
+        typedir = self.option( "typedir")
+
+        
         dirswitch = self.option("dirflag")
 
         dirflag = False if dirswitch == "off" else True
         
         gitprompthub = GitPromptHub(repo_type, main_pro, sub_pro, 
-                                    self.ssprompt.github_access_key, path, dirflag)
+                                    self.ssprompt.github_access_key, types, typedir, path, dirflag)
 
         depend_list = self.exec_prompt_hub(gitprompthub)
 
@@ -91,8 +106,8 @@ in the current directory.
 
             question_text = "Would you like to download these dependencies?"
             help_message = """\
-    Download these dependency packages locally through pip)
-    """     
+Download these dependency packages locally through pip
+"""     
             if self.confirm(question_text, True):
                 if self.io.is_interactive():
                     self.line(help_message)
@@ -129,3 +144,4 @@ in the current directory.
             for package_name, version  in depend.items():
                 install_verison =  repo.find_compatible_version(package_name, version)
                 repo.install_package(package_name, install_verison)
+                self.line(f"<info><{package_name}=={install_verison}</info> packages download and install successfully")

@@ -4,11 +4,14 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, List, Dict
 from pathlib import Path
 from pydantic import BaseModel, Field, validator
+from ssprompt.core.config import PromptTypesList
 
 class AbstractPromptHub(BaseModel,ABC):
 
     main_project: str
     sub_project: str 
+    types: str = None
+    typedir: str = None
     path: Path
     
     @validator('main_project')
@@ -21,6 +24,12 @@ class AbstractPromptHub(BaseModel,ABC):
             raise ValueError("The name isn't PromptHub project, please check")
         return values
 
+    @validator('types')
+    def valid_types(cls, value: str) ->str:
+        if value and value not in PromptTypesList:
+            raise ValueError("types must be the value in the list:[text,json,yaml,python]")
+        return value
+     
     @validator('path')
     def valid_path(cls, value: Path) ->Path:
         if not value.is_dir():
