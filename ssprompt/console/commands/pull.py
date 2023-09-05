@@ -56,7 +56,7 @@ class PullCommand(Command):
          option(
             "typedir",
              None, 
-            "Description Directory name of the corresponding type. The default value is the current project name",
+            "Description Directory name of the prompt type. The default value is the current project name",
             flag=False,
         ),
         option(
