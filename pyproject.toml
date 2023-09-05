@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ssprompt"
-version = "0.0.3"
+version = "0.0.4"
 description = "A LLM Prompt distribution tool"
 authors = ["ptonlix <baird0917@163.com>"]
 readme = "README.md"
