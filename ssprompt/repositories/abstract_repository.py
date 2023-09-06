@@ -12,9 +12,9 @@ class AbstractRepository(ABC):
         return self._name
 
     @abstractmethod
-    def check_package_exists(self, name: str, version:str|None=None) -> bool:
+    def check_package_exists(self, name: str, version: str | None = None) -> bool:
         ...
 
     @abstractmethod
-    def install_package(self, name: str, version:str|None=None):
+    def install_package(self, name: str, version: str | None = None):
         ...

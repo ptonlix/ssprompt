@@ -1,45 +1,47 @@
 from __future__ import annotations
 
 import subprocess
-from abc import ABC, abstractmethod
 from importlib import metadata
-from typing import TYPE_CHECKING
 import logging
 import requests
 import re
 
 from ssprompt.repositories.abstract_repository import AbstractRepository
 
-if TYPE_CHECKING:
-    from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
+
 class PyPiRepository(AbstractRepository):
-    def __init__(self, 
-        url="https://pypi.org/pypi", 
-        index="https://pypi.tuna.tsinghua.edu.cn/simple"
+    def __init__(
+        self,
+        url="https://pypi.org/pypi",
+        index="https://pypi.tuna.tsinghua.edu.cn/simple",
     ):
         self._base_url = url
         self._index = index
-    def check_package_exists(self,name: str, version:str|None=None) -> bool:
-        package =  name + "/json"
-        if version:
-            package = name + "/" + version + "/json"
 
-        response = requests.get(self._base_url + "/"+ name + "/json")
+    def check_package_exists(self, name: str, version: str | None = None) -> bool:
+        package = f"/{name}/json"
+        if version:
+            package = f"/{name}/{version}/json"
+        print(self._base_url + package)
+        response = requests.get(self._base_url + package)
         if response.status_code == 404:
             return False
         return True
 
-    def install_package(self, name: str, version:str|None=None):
+    def install_package(self, name: str, version: str | None = None):
         if version:
             package_identifier = f"{name}=={version}"
         else:
             package_identifier = name
 
         try:
-            subprocess.check_output(["pip", "install", package_identifier, "-i", self._index], stderr=subprocess.STDOUT)
+            subprocess.check_output(
+                ["pip", "install", package_identifier, "-i", self._index],
+                stderr=subprocess.STDOUT,
+            )
             logger.info(f"Successfully installed package '{package_identifier}'")
         except subprocess.CalledProcessError as e:
             logger.error("Unable to install package.")
@@ -48,12 +50,13 @@ class PyPiRepository(AbstractRepository):
     def is_package_installed(self, package_name: str, required_version=None):
         try:
             installed_version = metadata.version(package_name)
-            if required_version: 
-                return self.check_version_constraint(installed_version, required_version)
+            if required_version:
+                return self.check_version_constraint(
+                    installed_version, required_version
+                )
             return True
         except metadata.PackageNotFoundError:
             return False
-
 
     def check_version_constraint(self, version, constraint):
         if constraint.startswith("^"):
@@ -62,7 +65,6 @@ class PyPiRepository(AbstractRepository):
             return self._check_tilde_requirement(version, constraint)
         else:
             return self._check_wildcard_requirement(version, constraint)
-        
 
     def _check_caret_requirement(self, version, constraint):
         constraint_version = constraint[1:]
@@ -99,11 +101,11 @@ class PyPiRepository(AbstractRepository):
     def _check_wildcard_requirement(self, version, constraint):
         pattern = constraint.replace("*", r"\d+")
         return re.fullmatch(pattern, version) is not None
-    
+
     def get_available_versions(self, package_name):
-        url = self._base_url+f"/{package_name}/json"
+        url = self._base_url + f"/{package_name}/json"
         response = requests.get(url)
- 
+
         if response.status_code == 200:
             data = response.json()
             latest_version = data.get("info", {}).get("version", "")
@@ -119,11 +121,11 @@ class PyPiRepository(AbstractRepository):
         for version in available_versions:
             if self.check_version_constraint(version, desired_version):
                 return version
-        
-        return None
-        
-if __name__  == "__main__":
 
+        return None
+
+
+if __name__ == "__main__":
     repo = PyPiRepository()
 
     package_name = "langchain"
@@ -136,7 +138,7 @@ if __name__  == "__main__":
     #     print(f"包 '{package_name}' 已在本地安装")
     # else:
     #     print(f"包 '{package_name}' 未在本地安装")
-    
+
     # related_packages = repo.get_related_packages("requests")
     # if related_packages:
     #     print(f"与 'requests' 相关的包列表:")

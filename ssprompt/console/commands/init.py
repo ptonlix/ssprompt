@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Mapping, Union
+from typing import Any, Dict, Mapping, Union
 
-from cleo.helpers import argument, option
+from cleo.helpers import option
 from packaging.utils import canonicalize_name
 
 from ssprompt.console.commands.command import Command
@@ -10,26 +10,28 @@ from ssprompt.repositories import AbstractRepository, PyPiRepository
 
 Requirements = Dict[str, Union[str, Mapping[str, Any]]]
 
-class InitCommand(Command):
 
+class InitCommand(Command):
     def __init__(self) -> None:
         super().__init__()
 
         self._repository: AbstractRepository | None = None
 
-
     name = "init"
-    description = "Creates a basic <comment>prompt_project.yaml</> file in the current directory."
+    description = (
+        "Creates a basic <comment>prompt_project.yaml</> file in the current directory."
+    )
 
     options = [
         option("name", None, "Set the prompt project name.", flag=False),
         option("description", None, "Description of the prompt project.", flag=False),
-        option("author", None, "Author name of the package.", flag=False, multiple=True),
+        option(
+            "author", None, "Author name of the package.", flag=False, multiple=True
+        ),
         option("license", None, "Prompt project version number", flag=False),
-        
         option(
             "types",
-             None, 
+            None,
             "Specify the Prompt file type, default to all. option: [text,json,yaml,python]",
             flag=False,
             multiple=True,
@@ -64,16 +66,18 @@ The <c1>init</c1> command creates a basic <comment>prompt_project.yaml</> file i
 """
 
     loggers = ["ssprompt.core.vcs.git"]
+
     def handle(self) -> int:
         from pathlib import Path
 
         from ssprompt.core.config import PyYaml
         from ssprompt.core.vcs.git import GitConfig
         from ssprompt.layouts import layout
+
         layout_cls = layout("standard")
 
         project_path = Path.cwd()
-        config_file = project_path.name+".yaml"
+        config_file = project_path.name + ".yaml"
 
         yaml = PyYaml(project_path.joinpath(config_file))
 
@@ -94,7 +98,7 @@ The <c1>init</c1> command creates a basic <comment>prompt_project.yaml</> file i
             self.line("")
             self.line(
                 "This command will guide you through creating your"
-                " <info>pyproject.toml</> config."
+                " <info>prompt_project.yaml</> config."
             )
             self.line("")
 
@@ -110,7 +114,7 @@ The <c1>init</c1> command creates a basic <comment>prompt_project.yaml</> file i
         description = self.option("description")
         if not description:
             description = self.ask(self.create_question("Description []: ", default=""))
-        
+
         version = "0.1.0"
         question = self.create_question(
             f"Version [<comment>{version}</comment>]: ", default=version
@@ -130,12 +134,12 @@ The <c1>init</c1> command creates a basic <comment>prompt_project.yaml</> file i
                 author_list = []
 
         question = self.create_question(
-            f"Author [<comment>{author_list[0]}</comment>, n to skip]: ", default=author_list
+            f"Author [<comment>{author_list[0]}</comment>, n to skip]: ",
+            default=author_list,
         )
         question.set_validator(lambda v: self._validate_author(v))
         author = self.ask(question)
         author_list = [author] if author else author_list
-        
 
         license = self.option("license")
         if not license:
@@ -147,7 +151,7 @@ The <c1>init</c1> command creates a basic <comment>prompt_project.yaml</> file i
         help_message = """\
 Specify the Prompt file type, default to all. option: [all text json yaml python]
 - A Prompt project type list (<b>[all] [text python] ...</b>)
-"""   
+"""
         if not types_list:
             self.line(help_message)
             question = self.create_question("Prompt Project Type []: ", default="all")
@@ -160,10 +164,12 @@ Specify the Prompt file type, default to all. option: [all text json yaml python
         help_message = """\
 The applicable large model version of Prompt
 - List of supporting large language models (<b>[gpt-3.5-turbo] [gpt-3.5-turbo chatglm2-6b] ...</b>)
-"""   
+"""
         if not llm_list:
             self.line(help_message)
-            question = self.create_question("Support LLM List []: ", default="gpt-3.5-turbo")
+            question = self.create_question(
+                "Support LLM List []: ", default="gpt-3.5-turbo"
+            )
             question.set_validator(lambda v: self._validate_list(v))
             llm_list = self.ask(question)
 
@@ -172,14 +178,13 @@ The applicable large model version of Prompt
         tag_list = self.option("tag")
         help_message = """\
 The tags of Prompt
--List of tags Supported (<b>[common] [common QA] ...</b>)
-""" 
+-List of tags Supported (<b>[common] [common summarization] ...</b>)
+"""
         if not tag_list:
             self.line(help_message)
             question = self.create_question("Support Tag List []: ", default="common")
             question.set_validator(lambda v: self._validate_list(v))
             tag_list = self.ask(question)
-
 
         if self.io.is_interactive():
             self.line("")
@@ -189,14 +194,15 @@ The tags of Prompt
         help_message = """\
 You can specify a package in the following forms:
   - A name and a constraint (<b>langchain@^0.0.266</b>)
-"""     
+"""
         if self.confirm(question_text, True):
             if self.io.is_interactive():
                 self.line(help_message)
-                requirements.update(self._determine_requirements(self.option("dependencies"))) 
+                requirements.update(
+                    self._determine_requirements(self.option("dependencies"))
+                )
             if self.io.is_interactive():
                 self.line("")
-
 
         layout_ = layout_cls(
             name,
@@ -205,14 +211,15 @@ You can specify a package in the following forms:
             llm=llm_list,
             tag=tag_list,
             types_list=types_list,
-            dependencies=requirements
+            dependencies=requirements,
         )
 
         layout_.create_config_file(project_path)
 
+        self.line(
+            f"<info>The configuration file <comment>{config_file}</comment> is created and initialization is complete. enjoy AI!</info>"
+        )
         return 0
-
-     
 
     def _determine_requirements(
         self,
@@ -222,7 +229,9 @@ You can specify a package in the following forms:
 
         for depend in requires:
             if "@" not in depend:
-                raise ValueError('The input format of dependencies is incorrect. eg. -d langchain@^0.0.266')
+                raise ValueError(
+                    "The input format of dependencies is incorrect. eg. -d langchain@^0.0.266"
+                )
             depend_sub_list = depend.split("@")
             result[depend_sub_list[0]] = depend_sub_list[1]
 
@@ -253,7 +262,7 @@ You can specify a package in the following forms:
 
                 version_constraint = self.ask(question)
                 if not version_constraint:
-                    version_constraint = "latest" 
+                    version_constraint = "latest"
 
                 self.line(
                     f"Using version <b>{version_constraint}</b> for"
@@ -267,7 +276,6 @@ You can specify a package in the following forms:
 
         return result
 
-    
     @staticmethod
     def _validate_package(package: str | None) -> str | None:
         if package and len(package.split()) > 2:
@@ -278,11 +286,12 @@ You can specify a package in the following forms:
     def _validate_list(self, types: str) -> list[str]:
         return types.split()
 
-
     def _validate_author(self, author: str) -> str | None:
         import re
 
-        author_regex = re.compile(r'^[A-Za-z\s]+<[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}>$')
+        author_regex = re.compile(
+            r"^[A-Za-z\s]+<[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}>$"
+        )
 
         if author in ["n", "no"]:
             return None
@@ -297,7 +306,6 @@ You can specify a package in the following forms:
         return author
 
     def _get_repository(self) -> AbstractRepository:
-        
         if self._repository is None:
             self._repository = PyPiRepository()
 

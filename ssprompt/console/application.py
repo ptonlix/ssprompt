@@ -1,18 +1,14 @@
 from __future__ import annotations
 
 import logging
-import re
-from contextlib import suppress
 from importlib import import_module
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from cleo.application import Application as BaseApplication
 from cleo.events.console_command_event import ConsoleCommandEvent
 from cleo.events.console_events import COMMAND
 from cleo.events.event_dispatcher import EventDispatcher
-from cleo.exceptions import CleoError
 from cleo.formatters.style import Style
-from cleo.io.null_io import NullIO
 
 from ssprompt.__version__ import __version__
 from ssprompt.console.command_loader import CommandLoader
@@ -23,13 +19,10 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from cleo.events.event import Event
-    from cleo.io.inputs.argv_input import ArgvInput
-    from cleo.io.inputs.definition import Definition
     from cleo.io.inputs.input import Input
     from cleo.io.io import IO
     from cleo.io.outputs.output import Output
 
-    from ssprompt.ssprompt import Ssprompt
 
 def load_command(name: str) -> Callable[[], Command]:
     def _load() -> Command:
@@ -41,6 +34,7 @@ def load_command(name: str) -> Callable[[], Command]:
 
     return _load
 
+
 COMMANDS = [
     "about",
     "add",
@@ -51,9 +45,8 @@ COMMANDS = [
     "version",
 ]
 
+
 class Application(BaseApplication):
-
-
     def __init__(self) -> None:
         super().__init__("ssprompt", __version__)
 
@@ -69,7 +62,6 @@ class Application(BaseApplication):
 
     @property
     def ssprompt(self) -> Ssprompt:
-
         if self._ssprompt is not None:
             return self._ssprompt
 
@@ -109,9 +101,10 @@ class Application(BaseApplication):
         self._io = io
 
         return io
-    
-    def register_command_loggers(self, event: Event, event_name: str, _: EventDispatcher) -> None:
-      
+
+    def register_command_loggers(
+        self, event: Event, event_name: str, _: EventDispatcher
+    ) -> None:
         from ssprompt.console.logging.filters import SSPROMPT_FILTER
         from ssprompt.console.logging.io_formatter import IOFormatter
         from ssprompt.console.logging.io_handler import IOHandler
@@ -123,7 +116,7 @@ class Application(BaseApplication):
 
         io = event.io
 
-        # 必须要打印日志的模块   
+        # 必须要打印日志的模块
         loggers = [
             "ssprompt.packages.locker",
         ]
@@ -149,7 +142,8 @@ class Application(BaseApplication):
         for name in loggers:
             logger = logging.getLogger(name)
             logger.setLevel(level)
-    
+
+
 def main() -> int:
     exit_code: int = Application().run()
     return exit_code

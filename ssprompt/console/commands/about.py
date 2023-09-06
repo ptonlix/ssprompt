@@ -21,13 +21,15 @@ class AboutCommand(Command):
         # that.
         version: Callable[[str], str] = metadata.version
 
-        self.line(f"""\
+        self.line(
+            f"""\
 <info>ssprompt - A LLM Prompt distribution tool
 
 Version: {version('ssprompt')}</info>
 
 <comment>Change the world, even a little bit.
 See <fg=blue>https://github.com/ptonlix/ssprompt</> for more information.</comment>\
-""")
+"""
+        )
 
         return 0

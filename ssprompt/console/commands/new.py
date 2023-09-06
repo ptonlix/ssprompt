@@ -13,11 +13,12 @@ class NewCommand(Command):
     arguments = [
         argument("path", "The path to create the project at."),
         argument(
-            "types", 
+            "types",
             "Specify the Prompt file type, default to all. option: [text,json,yaml,python]",
             optional=True,
-            default="all")
-        ]
+            default="all",
+        ),
+    ]
     options = [
         option("name", None, "Set the prompt project name.", flag=False),
         option(
@@ -32,7 +33,7 @@ class NewCommand(Command):
             "The applicable large model version of Prompt, example: --llm=gpt-3.5-turbo",
             flag=False,
             multiple=True,
-            default=["gpt-3.5-turbo"]
+            default=["gpt-3.5-turbo"],
         ),
         option(
             "tag",
@@ -40,7 +41,7 @@ class NewCommand(Command):
             "The tags of Prompt, example: --tag=common",
             flag=False,
             multiple=True,
-            default=["common"]
+            default=["common"],
         ),
         option(
             "dependencies",
@@ -49,17 +50,18 @@ class NewCommand(Command):
             "e.g. -d langchain@^0.0.266",
             flag=False,
             multiple=True,
-            default=['langchain@^0.0.266']
+            default=["langchain@^0.0.266"],
         ),
     ]
 
     loggers = ["ssprompt.core.vcs.git"]
+
     def handle(self) -> int:
         from pathlib import Path
 
         from ssprompt.core.vcs.git import GitConfig
         from ssprompt.layouts import layout
-      
+
         layout_cls = layout("standard")
 
         path = Path(self.argument("path"))
@@ -78,9 +80,9 @@ class NewCommand(Command):
             raise RuntimeError(
                 f"Destination <fg=yellow>{path}</> exists and is not empty"
             )
-        
+
         readme_format = self.option("readme") or "md"
-        
+
         # 获取Git配置信息
         git_config = GitConfig()
         author_list = []
@@ -101,7 +103,9 @@ class NewCommand(Command):
         depend_obj = {}
         for depend in depend_list:
             if not depend.find("@"):
-                raise ValueError('The input format of dependencies is incorrect. eg. -d langchain@^0.0.266')
+                raise ValueError(
+                    "The input format of dependencies is incorrect. eg. -d langchain@^0.0.266"
+                )
             depend_sub_list = depend.split("@")
             depend_obj[depend_sub_list[0]] = depend_sub_list[1]
 
@@ -113,11 +117,9 @@ class NewCommand(Command):
             llm=llm_list,
             tag=tag_list,
             types_list=types_list,
-            dependencies=depend_obj
+            dependencies=depend_obj,
         )
 
         layout_.create(path)
 
-
         return 0
-
