@@ -10,8 +10,8 @@ from ssprompt.core.config import PromptTypesList
 class AbstractPromptHub(BaseModel, ABC):
     main_project: str
     sub_project: str
-    types: str = ""
-    typedir: str = ""
+    types: str | None = ""
+    typedir: str | None = ""
     path: Path
 
     @validator("main_project")
