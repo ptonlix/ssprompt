@@ -170,6 +170,7 @@ export GITHUB_ACCESS_KEY=`Your GitHub Token`
 - [x] 搭建 ssprompt 初步框架，完善基本功能
 - [ ] 完善 ssprompt 命令
   - [x] pull 命令支持拉取特定类型 Prompt 工程到本地
+  - [x] 支持生成默认 Prompt 结构化模版
   - [ ] show 命令支持展示更多 PromptHub 信息
 - [ ] 搭建和完善 PromptHub
   - [ ] 收集全网优秀的 Prompt 案例，使用 ssprompt 构建工程并上传到 PromptHub
